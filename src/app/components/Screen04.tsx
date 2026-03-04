@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useTelegramMainButton, useHapticFeedback, useTelegram } from "../hooks/useTelegram";
 
-interface Screen03Props {
+interface Screen04Props {
   onNext: () => void;
-  onNameChange: (name: string) => void;
-  name: string;
+  onAvatarChange: (avatar: string) => void;
+  selectedAvatar: string;
 }
 
 function StatusBar() {
@@ -32,68 +32,81 @@ function Slider() {
   return (
     <div className="absolute left-[34px] top-[93px] w-[370px]">
       <div className="h-[6px] w-full bg-gradient-to-r from-purple-300/50 via-purple-200/50 to-purple-100/50 rounded-full"/>
-      <div className="absolute top-0 left-0 h-[6px] w-[125px] bg-gradient-to-r from-purple-400 to-purple-300 rounded-full"/>
+      <div className="absolute top-0 left-0 h-[6px] w-[157px] bg-gradient-to-r from-purple-400 to-purple-300 rounded-full"/>
     </div>
   );
 }
 
-export default function Screen03({ onNext, onNameChange, name }: Screen03Props) {
-  const [isFocused, setIsFocused] = useState(false);
+const avatars = [
+  "👶", "🍼", "🧸", "🎈", "⭐", "🌙",
+  "🦄", "🐣", "🐰", "🐻", "🐼", "🦁",
+  "🌈", "🎀", "💫", "✨", "🎁", "🍭"
+];
+
+export default function Screen04({ onNext, onAvatarChange, selectedAvatar }: Screen04Props) {
   const hapticFeedback = useHapticFeedback();
   const { tg } = useTelegram();
 
-  // Use Telegram MainButton (disabled when name is empty)
+  // Use Telegram MainButton
   useTelegramMainButton("Далее", () => {
     hapticFeedback.light?.();
     onNext();
-  }, name.trim().length > 0);
+  }, true);
+
+  const handleAvatarSelect = (avatar: string) => {
+    hapticFeedback.selection?.();
+    onAvatarChange(avatar);
+  };
 
   return (
     <div className="bg-[#191838] relative w-full h-screen overflow-hidden">
       <StatusBar />
       
-      <h1 className="absolute left-1/2 -translate-x-1/2 top-[178px] w-[345px] text-white text-[32px] text-center font-medium leading-tight">
-        Давай добавим имя?
+      <h1 className="absolute left-1/2 -translate-x-1/2 top-[150px] w-[345px] text-white text-[32px] text-center font-medium leading-tight">
+        Выбери аватар
       </h1>
       
-      <p className="absolute left-1/2 -translate-x-1/2 top-[284px] w-[345px] text-[#8483a8] text-[17px] text-center">
-        Нам нужно это, чтобы считать сны 💫
+      <p className="absolute left-1/2 -translate-x-1/2 top-[240px] w-[345px] text-[#8483a8] text-[17px] text-center">
+        Можно будет изменить позже 🎨
       </p>
       
       <Slider />
       
-      <div className="absolute left-[20px] top-[710px] w-[387px] h-[78px] bg-[#252352] rounded-[12px] flex items-center justify-center px-5">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => onNameChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          placeholder="Имя"
-          className={`
-            w-full bg-transparent outline-none text-center
-            text-[20px] transition-colors
-            ${name ? 'text-white' : 'text-white/50'}
-            placeholder:text-white/50
-          `}
-        />
+      {/* Selected Avatar Preview */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-[320px] w-[120px] h-[120px] bg-[#252352] rounded-full flex items-center justify-center">
+        <span className="text-[70px]">{selectedAvatar}</span>
+      </div>
+
+      {/* Avatar Grid */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-[470px] w-[370px] h-[300px] overflow-y-auto px-2">
+        <div className="grid grid-cols-6 gap-3">
+          {avatars.map((avatar) => (
+            <button
+              key={avatar}
+              onClick={() => handleAvatarSelect(avatar)}
+              className={`
+                w-[50px] h-[50px] rounded-[12px] flex items-center justify-center
+                transition-all duration-200 cursor-pointer
+                ${selectedAvatar === avatar 
+                  ? 'bg-[#babbff] scale-110 shadow-lg' 
+                  : 'bg-[#252352] hover:bg-[#2d2a5d]'
+                }
+              `}
+            >
+              <span className="text-[28px]">{avatar}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Fallback button for non-Telegram environment */}
       {!tg && (
         <button
-          className={`absolute left-[121px] top-[830px] w-[186px] h-[72px] rounded-[36px] flex items-center justify-center cursor-pointer transition-colors ${
-            name.trim().length > 0
-              ? 'bg-[#babbff] hover:bg-[#cacbff]'
-              : 'bg-[#6d6d8e] cursor-not-allowed'
-          }`}
+          className="absolute left-[121px] top-[830px] w-[186px] h-[72px] bg-[#babbff] rounded-[36px] flex items-center justify-center cursor-pointer hover:bg-[#cacbff] transition-colors"
           onClick={() => {
-            if (name.trim().length > 0) {
-              hapticFeedback.light?.();
-              onNext();
-            }
+            hapticFeedback.light?.();
+            onNext();
           }}
-          disabled={name.trim().length === 0}
         >
           <span className="text-[#0f0f1a] text-[17px] font-medium">
             Далее

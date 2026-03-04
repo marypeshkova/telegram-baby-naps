@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTelegramMainButton, useHapticFeedback, useTelegram } from "../hooks/useTelegram";
 
 interface Screen01Props {
   onNext: () => void;
@@ -38,6 +39,14 @@ function Slider() {
 
 export default function Screen01({ onNext, onDateChange, selectedDate }: Screen01Props) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const hapticFeedback = useHapticFeedback();
+  const { tg } = useTelegram();
+
+  // Use Telegram MainButton
+  useTelegramMainButton("Далее", () => {
+    hapticFeedback.light?.();
+    onNext();
+  }, true);
 
   const formatDate = (date: Date) => {
     const monthNames = [
@@ -85,7 +94,7 @@ export default function Screen01({ onNext, onDateChange, selectedDate }: Screen0
       <StatusBar />
       
       <h1 className="absolute left-1/2 -translate-x-1/2 top-[178px] w-[345px] text-white text-[32px] text-center font-medium leading-tight">
-        К��гда родился твой малыш?
+        Кгда родился твой малыш?
       </h1>
       
       <p className="absolute left-1/2 -translate-x-1/2 top-[284px] w-[345px] text-[#8483a8] text-[17px] text-center">
@@ -102,15 +111,21 @@ export default function Screen01({ onNext, onDateChange, selectedDate }: Screen0
           {formatDate(selectedDate)}
         </span>
       </button>
-      
-      <button
-        className="absolute left-[121px] top-[830px] w-[186px] h-[72px] bg-[#babbff] rounded-[36px] flex items-center justify-center cursor-pointer hover:bg-[#cacbff] transition-colors"
-        onClick={onNext}
-      >
-        <span className="text-[#0f0f1a] text-[17px] font-medium">
-          Далее
-        </span>
-      </button>
+
+      {/* Fallback button for non-Telegram environment */}
+      {!tg && (
+        <button
+          className="absolute left-[121px] top-[830px] w-[186px] h-[72px] bg-[#babbff] rounded-[36px] flex items-center justify-center cursor-pointer hover:bg-[#cacbff] transition-colors"
+          onClick={() => {
+            hapticFeedback.light?.();
+            onNext();
+          }}
+        >
+          <span className="text-[#0f0f1a] text-[17px] font-medium">
+            Далее
+          </span>
+        </button>
+      )}
 
       {/* Calendar Drawer */}
       {isCalendarOpen && (
@@ -185,6 +200,7 @@ export default function Screen01({ onNext, onDateChange, selectedDate }: Screen0
                             const newDate = new Date(selectedDate);
                             newDate.setDate(day);
                             onDateChange(newDate);
+                            hapticFeedback.light?.();
                           }}
                           className={`
                             aspect-square flex items-center justify-center rounded-full

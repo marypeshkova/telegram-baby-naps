@@ -1,11 +1,126 @@
+# 🎨 Baby App - Telegram Mini App
 
-  # Mobile App Prototype Naps
+Telegram Mini App для онбординга с полным циклом регистрации малыша.
 
-  This is a code bundle for Mobile App Prototype Naps. The original project is available at https://www.figma.com/design/oytyPTC4MlQURsl4ZoYfbv/Mobile-App-Prototype-Naps.
+## ✨ Экраны приложения
 
-  ## Running the code
+1. **Экран 0.1** - Выбор даты рождения с календарем (blur эффект)
+2. **Экран 0.2** - Выбор пола (мальчик/девочка)
+3. **Экран 0.3** - Ввод имени
+4. **Экран 0.4** - Выбор аватара из 18 эмодзи
+5. **Экран 0.5** - Финальный экран с поздравлением
+6. **Dashboard** - Главный экран с карточками статистики
 
-  Run `npm i` to install the dependencies.
+## 🚀 Быстрый старт
 
-  Run `npm run dev` to start the development server.
-  
+### Локальная разработка
+
+```bash
+# Установка зависимостей
+npm install
+# или
+pnpm install
+
+# Запуск в режиме разработки
+npm run dev
+```
+
+### Деплой на Vercel
+
+1. Установите Vercel CLI:
+```bash
+npm i -g vercel
+```
+
+2. Войдите в аккаунт:
+```bash
+vercel login
+```
+
+3. Деплой:
+```bash
+vercel --prod
+```
+
+После деплоя вы получите URL вида: `https://ваш-проект.vercel.app`
+
+### Настройка в Telegram
+
+1. Откройте [@BotFather](https://t.me/BotFather)
+2. Отправьте `/newapp`
+3. Выберите вашего бота
+4. Заполните данные:
+   - **Title**: Baby App
+   - **Description**: Онбординг для выбора даты рождения
+   - **Photo**: загрузите иконку или отправьте `/empty`
+   - **Demo**: `/empty`
+   - **Web App URL**: `https://ваш-проект.vercel.app`
+   - **Short name**: `babyapp`
+
+5. Готово! Теперь можете открыть приложение по ссылке:
+   ```
+   https://t.me/ваш_бот/babyapp
+   ```
+
+## ✨ Возможности
+
+- ✅ **Telegram Web App SDK** - нативная интеграция
+- ✅ **MainButton** - системная кнопка внизу экрана
+- ✅ **Haptic Feedback** - вибрация при взаимодействии
+- ✅ **Автозаполнение имени** из профиля Telegram
+- ✅ **Календарь** с эффектом blur
+- ✅ **Адаптивный дизайн** под мобильные устройства
+
+## 📁 Структура проекта
+
+```
+/
+├── index.html                 # Точка входа с Telegram SDK
+├── src/
+│   ├── main.tsx              # Инициализация React
+│   ├── app/
+│   │   ├── App.tsx           # Главный компонент с навигацией
+│   │   ├── hooks/
+│   │   │   └── useTelegram.ts # Хуки для Telegram SDK
+│   │   └── components/
+│   │       ├── Screen01.tsx   # Выбор даты рождения
+│   │       ├── Screen02.tsx   # Выбор пола
+│   │       ├── Screen03.tsx   # Ввод имени
+│   │       ├── Screen04.tsx   # Выбор аватара
+│   │       ├── Screen05.tsx   # Финальный экран
+│   │       └── Dashboard.tsx  # Главный экран
+│   └── styles/
+│       └── index.css          # Глобальные стили
+└── package.json
+```
+
+## 🛠 Технологии
+
+- **React 18** - UI библиотека
+- **TypeScript** - типизация
+- **Tailwind CSS v4** - стили
+- **Motion** - анимации переходов
+- **Vite** - сборщик
+- **Telegram Web App SDK** - интеграция с Telegram
+
+## 📱 Тестирование
+
+### В браузере
+Откройте `http://localhost:5173` - приложение будет работать, но без Telegram SDK.
+
+### В Telegram
+После деплоя откройте приложение через бота в Telegram для полноценного тестирования.
+
+## 🔧 Дальнейшее развитие
+
+- [ ] Сохранение данных в LocalStorage или Supabase
+- [ ] Функционал Dashboard (отслеживание сна, роста, кормления)
+- [ ] Валидация форм и обработка ошибок
+- [ ] Возможность редактирования профиля
+- [ ] Темная/светлая тема по настройкам Telegram
+- [ ] Уведомления через бота
+- [ ] Загрузка реальных фотографий вместо эмодзи
+
+## 📝 Лицензия
+
+MIT

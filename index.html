@@ -238,23 +238,52 @@ html, body {
 /* ── MAIN APP ── */
 .app-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px 8px;
-  position: sticky; top: 0; z-index: 15;
-  background: linear-gradient(to bottom, var(--bg) 80%, transparent);
+  padding: 12px 16px 6px;
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 25;
+  background: linear-gradient(to bottom, var(--bg) 85%, transparent);
 }
-.avatar {
-  width: 36px; height: 36px;
-  border-radius: 50%;
+
+/* Profile avatar — top left, shows baby age */
+.profile-avatar-btn {
+  width: 42px; height: 42px; border-radius: 50%;
   background: linear-gradient(135deg, var(--purple), var(--pink));
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 15px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: none; cursor: pointer; flex-shrink: 0;
+  position: relative; gap: 0;
+  box-shadow: 0 2px 12px rgba(124,111,224,0.4);
+  transition: transform 0.15s;
 }
+.profile-avatar-btn:active { transform: scale(0.93); }
+.profile-avatar-btn .pab-initial { font-size: 14px; font-weight: 900; line-height: 1; color: #fff; }
+.profile-avatar-btn .pab-age {
+  font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.85);
+  line-height: 1; margin-top: 1px;
+}
+
 .date-pill {
   display: flex; align-items: center; gap: 6px;
   font-size: 15px; font-weight: 700;
   cursor: pointer;
 }
 .date-pill svg { opacity: 0.6; }
+
+/* Sleep nav pill in tabbar */
+.nav-sleep-pill {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); flex: 1; padding: 8px 4px;
+  transition: color 0.2s;
+  position: relative;
+}
+.nav-sleep-pill.active { color: var(--purple-soft); }
+.nav-sleep-pill .nsp-icon { font-size: 20px; line-height: 1; }
+.nav-sleep-pill .nsp-timer {
+  font-size: 9px; font-weight: 800; color: var(--purple-soft);
+  background: rgba(124,111,224,0.2); border-radius: 6px;
+  padding: 1px 5px; line-height: 1.4;
+}
+.nav-sleep-pill .nsp-lbl { font-size: 10px; font-weight: 700; }
 .week-strip {
   display: flex; gap: 0;
   padding: 0 20px 12px;
@@ -324,7 +353,194 @@ html, body {
 .awake-since-pill .asp-val { font-size: 14px; font-weight: 800; color: var(--wake-color); }
 .awake-since-pill .asp-lbl { font-size: 11px; color: var(--text-dim); }
 
-/* ── ENTRY EDIT POPUP ── */
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 72px;
+  background: rgba(10,11,26,0.96);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: stretch;
+  z-index: 30;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  transition: color 0.2s; padding: 8px 4px;
+  position: relative;
+}
+.nav-btn.active { color: var(--purple-soft); }
+.nav-btn .nb-icon { font-size: 22px; line-height: 1; transition: transform 0.2s; }
+.nav-btn.active .nb-icon { transform: scale(1.1); }
+.nav-btn .nb-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.02em; }
+/* Plus button in center */
+.nav-btn-plus {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer; padding: 8px;
+}
+.nav-plus-circle {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--purple-soft));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: #fff; font-weight: 300;
+  box-shadow: 0 4px 20px rgba(124,111,224,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 8px;
+}
+.nav-btn-plus:active .nav-plus-circle { transform: scale(0.92); box-shadow: 0 2px 10px rgba(124,111,224,0.3); }
+
+/* ── TAB SCREENS (inside main) ── */
+.tab-screen {
+  display: none; flex-direction: column;
+  position: fixed; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding-top: 64px; /* header height */
+  padding-bottom: 160px; /* nav + tracker */
+  z-index: 11;
+}
+.tab-screen.active { display: flex; }
+
+/* ── COMMUNITY SCREEN ── */
+.comm-header {
+  padding: 16px 20px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.comm-title { font-family: 'DM Serif Display', serif; font-size: 26px; }
+.comm-subtitle { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+.comm-filters {
+  display: flex; gap: 8px; padding: 0 20px 12px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.comm-filters::-webkit-scrollbar { display: none; }
+.comm-filter {
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text-dim); font-family: 'Nunito', sans-serif;
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+  cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.comm-filter.active {
+  background: rgba(124,111,224,0.25);
+  border-color: var(--purple-soft); color: var(--text);
+}
+.comm-feed { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+.post-card {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 18px; padding: 14px 16px;
+  animation: fadeUp 0.3s ease both;
+}
+.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.post-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; flex-shrink: 0;
+}
+.post-meta { flex: 1; }
+.post-author { font-size: 14px; font-weight: 800; }
+.post-info { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.post-tag {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 10px; flex-shrink: 0;
+}
+.post-body { font-size: 14px; line-height: 1.5; color: rgba(255,255,255,0.85); margin-bottom: 10px; }
+.post-footer { display: flex; align-items: center; gap: 14px; }
+.post-action {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--text-dim); font-weight: 600;
+  cursor: pointer; background: none; border: none;
+  transition: color 0.2s;
+}
+.post-action:active { color: var(--purple-soft); }
+.post-time { margin-left: auto; font-size: 11px; color: var(--text-muted); }
+
+/* New post button */
+.new-post-fab {
+  position: fixed; bottom: 88px; right: 20px;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  border: none; color: #fff; font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 25;
+  box-shadow: 0 4px 20px rgba(224,124,168,0.4);
+  transition: transform 0.2s;
+}
+.new-post-fab:active { transform: scale(0.9); }
+
+/* New post modal */
+.new-post-sheet {
+  width: 100%; background: #13142a;
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px 36px;
+}
+.np-textarea {
+  width: 100%; min-height: 100px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px 16px;
+  color: var(--text); font-family: 'Nunito', sans-serif;
+  font-size: 15px; line-height: 1.5;
+  outline: none; resize: none; margin-bottom: 12px;
+}
+.np-textarea:focus { border-color: var(--purple-soft); }
+.np-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.np-tag {
+  padding: 5px 12px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text-dim); font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.np-tag.selected {
+  background: rgba(124,111,224,0.25);
+  border-color: var(--purple-soft); color: var(--text);
+}
+
+/* ── BABY INFO SCREEN ── */
+.info-header {
+  padding: 16px 20px 8px;
+}
+.info-age-card {
+  margin: 0 16px 14px;
+  background: linear-gradient(135deg, rgba(124,111,224,0.2), rgba(224,124,168,0.15));
+  border: 1px solid rgba(124,111,224,0.3);
+  border-radius: 20px; padding: 16px 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+.info-age-emoji { font-size: 44px; }
+.info-age-text .iat-age { font-family: 'DM Serif Display', serif; font-size: 22px; }
+.info-age-text .iat-name { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+.info-age-text .iat-stage { font-size: 12px; color: var(--purple-soft); margin-top: 4px; font-weight: 700; }
+.info-articles { padding: 0 16px 80px; display: flex; flex-direction: column; gap: 12px; }
+.article-card {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 18px; overflow: hidden; cursor: pointer;
+  transition: transform 0.15s;
+}
+.article-card:active { transform: scale(0.98); }
+.article-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px 10px;
+}
+.article-emoji { font-size: 28px; }
+.article-tag {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 8px; background: rgba(124,111,224,0.2);
+  color: var(--purple-soft); margin-bottom: 4px; display: inline-block;
+}
+.article-title { font-size: 15px; font-weight: 800; line-height: 1.3; }
+.article-body {
+  font-size: 13px; color: var(--text-dim); line-height: 1.6;
+  padding: 0 16px 14px; display: none;
+}
+.article-body.open { display: block; }
+.article-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px 12px;
+}
+.article-read { font-size: 12px; color: var(--purple-soft); font-weight: 700; }
+.article-arrow { font-size: 16px; color: var(--text-muted); transition: transform 0.2s; }
+.article-card.expanded .article-arrow { transform: rotate(90deg); }
 .entry-popup {
   width: 100%; background: #13142a;
   border-radius: 24px 24px 0 0;
@@ -494,9 +710,9 @@ html, body {
 
 /* Bottom tracker bar */
 .tracker-bar {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  padding: 12px 20px 28px;
-  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  position: fixed; bottom: 72px; left: 0; right: 0;
+  padding: 8px 20px 8px;
+  background: linear-gradient(to top, var(--bg) 60%, transparent);
   z-index: 20;
 }
 .tracker-btn {
@@ -768,72 +984,132 @@ html, body {
 <!-- ── SCREEN: MAIN ── -->
 <div class="screen hidden" id="screen-main">
   <div class="app-header">
-    <div class="avatar" id="main-avatar">?</div>
+    <button class="profile-avatar-btn" id="profile-avatar-btn" onclick="openProfileModal()">
+      <span class="pab-initial" id="main-avatar">?</span>
+      <span class="pab-age" id="pab-age">0м</span>
+    </button>
     <div class="date-pill" id="header-date">
       <span id="hd-text">сегодня</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
     </div>
-    <div class="age-badge" id="age-badge">0м</div>
+    <div style="width:42px"></div><!-- spacer to centre date-pill -->
   </div>
 
-  <!-- Week strip -->
-  <div class="week-strip" id="week-strip"></div>
-
-  <!-- Arc -->
-  <div class="arc-section">
-    <div class="arc-wrap">
-      <svg id="arc-svg" viewBox="0 0 260 260">
-        <!-- arc-bg is drawn by JS -->
-        <path id="arc-bg" fill="none"/>
-        <g id="arc-segments"></g>
-        <g id="arc-markers"></g>
-      </svg>
-      <div class="arc-inner">
-        <div class="arc-label" id="arc-label">Сейчас</div>
-        <div class="arc-time" id="arc-time">--:--</div>
-        <div class="arc-subtitle" id="arc-subtitle">Отслеживай сны малыша</div>
+  <!-- ══ TAB: СОН ══ -->
+  <div class="tab-screen" id="tab-sleep">
+    <div class="week-strip" id="week-strip"></div>
+    <div class="arc-section">
+      <div class="arc-wrap">
+        <svg id="arc-svg" viewBox="0 0 260 260">
+          <path id="arc-bg" fill="none"/>
+          <g id="arc-segments"></g>
+          <g id="arc-markers"></g>
+        </svg>
+        <div class="arc-inner">
+          <div class="arc-label" id="arc-label">Сейчас</div>
+          <div class="arc-time" id="arc-time">--:--</div>
+          <div class="arc-subtitle" id="arc-subtitle"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mini-stats">
+      <div class="mini-stat">
+        <span class="ms-icon">🌗</span>
+        <span class="ms-val" id="ms-day24">—</span>
+        <span class="ms-lbl">Сутки</span>
+      </div>
+      <div class="mini-stat">
+        <span class="ms-icon">☀️</span>
+        <span class="ms-val" id="ms-awake-since">—</span>
+        <span class="ms-lbl">Бодрствует</span>
+      </div>
+      <div class="mini-stat">
+        <span class="ms-icon">🛏️</span>
+        <span class="ms-val" id="ms-naps">—</span>
+        <span class="ms-lbl">Дн. снов</span>
+      </div>
+      <div class="mini-stat">
+        <span class="ms-icon">🌙</span>
+        <span class="ms-val" id="ms-total">—</span>
+        <span class="ms-lbl" id="ms-total-lbl">Всего сна</span>
+      </div>
+    </div>
+    <div class="sleep-log" id="sleep-log">
+      <div style="text-align:center;color:var(--text-muted);padding:40px 0;font-size:14px">
+        Нажми кнопку внизу, чтобы начать отслеживать сон 🌙
       </div>
     </div>
   </div>
 
-  <!-- Awake since morning counter -->
-  <div class="awake-since-bar">
-    <div class="awake-since-pill">
-      <span class="asp-icon">⏱️</span>
-      <span class="asp-val" id="awake-since-val">—</span>
-      <span class="asp-lbl">бодрствует после сна</span>
+  <!-- ══ TAB: СООБЩЕСТВО ══ -->
+  <div class="tab-screen" id="tab-community">
+    <div class="comm-header">
+      <div class="comm-title">Сообщество 💬</div>
+      <div class="comm-subtitle">Мамы рядом и по всему миру</div>
+    </div>
+    <div class="comm-filters">
+      <div class="comm-filter active" onclick="filterPosts('all',this)">Все</div>
+      <div class="comm-filter" onclick="filterPosts('sleep',this)">Сон</div>
+      <div class="comm-filter" onclick="filterPosts('walk',this)">Прогулки</div>
+      <div class="comm-filter" onclick="filterPosts('food',this)">Питание</div>
+      <div class="comm-filter" onclick="filterPosts('question',this)">Вопросы</div>
+      <div class="comm-filter" onclick="filterPosts('support',this)">Поддержка</div>
+    </div>
+    <div class="comm-feed" id="comm-feed"></div>
+  </div>
+
+  <!-- ══ TAB: О РЕБЁНКЕ ══ -->
+  <div class="tab-screen" id="tab-info">
+    <div class="info-header">
+      <div class="comm-title">О малыше 👶</div>
+    </div>
+    <div class="info-age-card">
+      <div class="info-age-emoji" id="info-emoji">🌱</div>
+      <div class="info-age-text">
+        <div class="iat-age" id="info-age-str">—</div>
+        <div class="iat-name" id="info-baby-name">—</div>
+        <div class="iat-stage" id="info-stage">—</div>
+      </div>
+    </div>
+    <div class="info-articles" id="info-articles"></div>
+  </div>
+
+  <!-- ══ TAB: ПРОФИЛЬ ══ -->
+  <div class="tab-screen" id="tab-profile">
+    <div class="comm-header">
+      <div class="comm-title">Профиль</div>
+    </div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:12px;padding-bottom:100px">
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:18px;padding:20px;text-align:center">
+        <div style="font-size:50px;margin-bottom:10px" id="profile-emoji">🌙</div>
+        <div style="font-size:20px;font-weight:800" id="profile-name">—</div>
+        <div style="font-size:13px;color:var(--text-dim);margin-top:4px" id="profile-age">—</div>
+      </div>
+      <button onclick="resetApp()" style="padding:16px;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:14px;color:#ff6060;font-family:Nunito,sans-serif;font-size:15px;font-weight:700;cursor:pointer">
+        Сбросить данные
+      </button>
     </div>
   </div>
 
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-sleep-pill" id="nb-sleep" onclick="switchNav('sleep')">
+      <span class="nsp-icon">🌙</span>
+      <span class="nsp-timer" id="nav-sleep-timer" style="display:none">00:00</span>
+      <span class="nsp-lbl">Сон</span>
+    </button>
+    <button class="nav-btn" id="nb-community" onclick="switchNav('community')">
+      <span class="nb-icon">💬</span>
+      <span class="nb-lbl">Сообщество</span>
+    </button>
+    <button class="nav-btn" id="nb-info" onclick="switchNav('info')">
+      <span class="nb-icon">👶</span>
+      <span class="nb-lbl">О малыше</span>
+    </button>
+  </nav>
 
-  <!-- Compact mini stats: 3 items -->
-  <div class="mini-stats">
-    <div class="mini-stat">
-      <span class="ms-icon">🌗</span>
-      <span class="ms-val" id="ms-day24">—</span>
-      <span class="ms-lbl">Сутки</span>
-    </div>
-    <div class="mini-stat">
-      <span class="ms-icon">☀️</span>
-      <span class="ms-val" id="ms-awake-since">—</span>
-      <span class="ms-lbl">Бодрствует после сна</span>
-    </div>
-    <div class="mini-stat">
-      <span class="ms-icon">🌙</span>
-      <span class="ms-val" id="ms-total">—</span>
-      <span class="ms-lbl" id="ms-total-lbl">Всего сна</span>
-    </div>
-  </div>
-
-  <!-- Sleep log (no tabs) -->
-  <div class="sleep-log" id="sleep-log">
-    <div style="text-align:center;color:var(--text-muted);padding:40px 0;font-size:14px">
-      Нажми кнопку внизу, чтобы начать отслеживать сон 🌙
-    </div>
-  </div>
-
-  <!-- Tracker button -->
-  <div class="tracker-bar">
+  <!-- Tracker button (only on sleep tab) -->
+  <div class="tracker-bar" id="tracker-bar">
     <button class="tracker-btn idle" id="tracker-btn" onclick="trackerTap()">
       <span id="tb-label">Давай начнём</span>
       <div style="display:flex;align-items:center;gap:10px">
@@ -844,7 +1120,71 @@ html, body {
   </div>
 </div>
 
-<!-- ── MODAL: Quick actions ── -->
+<!-- ── MODAL: Profile settings ── -->
+<div class="modal-backdrop hidden" id="modal-profile" onclick="closeModal('modal-profile')">
+  <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Профиль</div>
+
+    <!-- Baby card -->
+    <div style="background:rgba(124,111,224,0.12);border:1px solid rgba(124,111,224,0.25);border-radius:16px;padding:16px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--purple-soft);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Мой малыш</div>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+        <div style="font-size:36px" id="pm-baby-emoji">👶</div>
+        <div>
+          <div style="font-size:18px;font-weight:800" id="pm-baby-name">—</div>
+          <div style="font-size:12px;color:var(--text-dim)" id="pm-baby-age">—</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px">Имя ребёнка</div>
+          <input class="name-input" id="pm-name-inp" style="margin-bottom:0" placeholder="Имя малыша">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px">Дата рождения</div>
+          <input type="date" class="name-input" id="pm-birth-inp" style="margin-bottom:0;color-scheme:dark">
+        </div>
+        <div class="gender-row" style="margin-bottom:0">
+          <button class="gender-btn" id="pm-g-boy" onclick="pmSelectGender('boy')">👦 Мальчик</button>
+          <button class="gender-btn" id="pm-g-girl" onclick="pmSelectGender('girl')">👧 Девочка</button>
+        </div>
+        <button onclick="pmSaveBaby()" style="padding:12px;background:linear-gradient(135deg,var(--purple),var(--purple-soft));border:none;border-radius:12px;color:#fff;font-family:Nunito,sans-serif;font-size:14px;font-weight:800;cursor:pointer">Сохранить</button>
+      </div>
+    </div>
+
+    <!-- Account section -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Аккаунт</div>
+      <input class="name-input" id="pm-email-inp" type="email" placeholder="Электронная почта" style="margin-bottom:8px">
+      <input class="name-input" id="pm-username-inp" type="text" placeholder="Ваше имя" style="margin-bottom:0">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;padding-bottom:4px">
+      <button onclick="pmLogout()" style="padding:14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;color:var(--text-dim);font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
+        Выйти из аккаунта
+      </button>
+      <button onclick="pmDeleteAccount()" style="padding:14px;background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.2);border-radius:12px;color:#ff6060;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
+        Удалить аккаунт
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop hidden" id="modal-post" onclick="closeModal('modal-post')">
+  <div class="new-post-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Новый пост</div>
+    <textarea class="np-textarea" id="np-text" placeholder="Поделись с другими мамами..."></textarea>
+    <div class="np-tags" id="np-tags">
+      <div class="np-tag" onclick="selectTag(this,'sleep')">😴 Сон</div>
+      <div class="np-tag" onclick="selectTag(this,'walk')">🌳 Прогулки</div>
+      <div class="np-tag" onclick="selectTag(this,'food')">🥣 Питание</div>
+      <div class="np-tag" onclick="selectTag(this,'question')">❓ Вопрос</div>
+      <div class="np-tag" onclick="selectTag(this,'support')">🤗 Поддержка</div>
+    </div>
+    <button class="btn-next" onclick="submitPost()">Опубликовать ✨</button>
+  </div>
+</div>
 <div class="modal-backdrop hidden" id="modal-action" onclick="closeModal('modal-action')">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
@@ -1114,11 +1454,11 @@ function goMain(){
 function initMain(){
   const n = state.baby.name;
   document.getElementById('main-avatar').textContent = n[0].toUpperCase();
-  document.getElementById('arc-subtitle').textContent = `Добавь когда "${n}" проснулся или уснул`;
   updateAgeBadge();
   renderWeekStrip();
   renderAll();
   startClockTick();
+  switchNav('sleep');
 }
 
 function updateAgeBadge(){
@@ -1826,11 +2166,273 @@ function epDelete(){
   showToast('Запись удалена 🗑');
 }
 
-// ── TABS (kept as stub, tabs removed from UI) ──
-function switchTab(tab){}
+// ── NAVIGATION ──
+let currentNav = 'sleep';
+function switchNav(tab){
+  currentNav = tab;
+  // Update nav buttons
+  ['community','sleep','info','profile'].forEach(t=>{
+    const btn = document.getElementById('nb-'+t);
+    if(btn) btn.classList.toggle('active', t===tab);
+  });
+  // Show/hide tab screens
+  ['sleep','community','info','profile'].forEach(t=>{
+    const el = document.getElementById('tab-'+t);
+    if(el){ el.classList.toggle('active', t===tab); }
+  });
+  // Tracker bar only on sleep tab
+  const tb = document.getElementById('tracker-bar');
+  if(tb) tb.style.display = tab==='sleep' ? 'block' : 'none';
+  // Lazy render
+  if(tab==='community') renderCommunity();
+  if(tab==='info') renderBabyInfo();
+  if(tab==='profile') renderProfile();
+}
 
-// ── RENDER STATS VIEW (kept for data integrity) ──
-function renderStatsView(){}
+function openQuickAdd(){
+  openModal(); // reuse existing sleep modal
+}
+
+// ── COMMUNITY ──
+let posts = [];
+let postFilter = 'all';
+let selectedPostTag = '';
+
+const TAG_META = {
+  sleep:    { label:'Сон',       color:'#7c6fe0', bg:'rgba(124,111,224,0.2)' },
+  walk:     { label:'Прогулки',  color:'#4caf8a', bg:'rgba(76,175,138,0.2)' },
+  food:     { label:'Питание',   color:'#f5a623', bg:'rgba(245,166,35,0.2)' },
+  question: { label:'Вопрос',    color:'#a99ef5', bg:'rgba(169,158,245,0.2)' },
+  support:  { label:'Поддержка', color:'#e07ca8', bg:'rgba(224,124,168,0.2)' },
+};
+
+const SAMPLE_POSTS = [
+  { id:1, author:'Аня', city:'Москва', babyAge:'7м', tag:'sleep', text:'Наконец-то прошли через регресс сна в 6 месяцев 🎉 Помогло полное затемнение и белый шум. Держитесь, мамочки — это временно!', likes:24, time:'2ч назад', avatar:'🌸' },
+  { id:2, author:'Катя', city:'Хельсинки', babyAge:'4м', tag:'question', text:'Девочки, у кого малыш в 4 месяца начал просыпаться каждый час ночью? Это регресс или норма? Уже не знаю что делать 😭', likes:8, time:'4ч назад', avatar:'⭐' },
+  { id:3, author:'Маша', city:'Питер', babyAge:'9м', tag:'food', text:'Начали прикорм! Дала брокколи — съела всё 😍 Поделитесь, с чего начинали вы?', likes:15, time:'6ч назад', avatar:'🌻' },
+  { id:4, author:'Оля', city:'Финляндия', babyAge:'6м', tag:'walk', text:'Ищу мам с малышами 5-8 месяцев в Эспоо для совместных прогулок по выходным! Пишите в личку 🌳', likes:6, time:'вчера', avatar:'🦋' },
+  { id:5, author:'Юля', city:'Тампере', babyAge:'11м', tag:'support', text:'Сегодня первый раз вышла из дома одна пока муж с малышом. Купила кофе и посидела 20 минут в тишине. Это было прекрасно и я плакала от облегчения 😂❤️', likes:47, time:'вчера', avatar:'💜' },
+];
+
+// Load saved posts
+try {
+  const saved = JSON.parse(localStorage.getItem('lb_posts') || '[]');
+  posts = [...saved, ...SAMPLE_POSTS];
+} catch(e){ posts = [...SAMPLE_POSTS]; }
+
+function savePosts(){
+  const userPosts = posts.filter(p=>p._user);
+  try { localStorage.setItem('lb_posts', JSON.stringify(userPosts)); } catch(e){}
+}
+
+function filterPosts(tag, el){
+  postFilter = tag;
+  document.querySelectorAll('.comm-filter').forEach(f=>f.classList.remove('active'));
+  el.classList.add('active');
+  renderCommunity();
+}
+
+function renderCommunity(){
+  const feed = document.getElementById('comm-feed');
+  if(!feed) return;
+  const filtered = postFilter==='all' ? posts : posts.filter(p=>p.tag===postFilter);
+  feed.innerHTML = '';
+  filtered.forEach((p,i)=>{
+    const meta = TAG_META[p.tag] || TAG_META.support;
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    card.style.animationDelay = `${i*0.05}s`;
+    card.innerHTML = `
+      <div class="post-header">
+        <div class="post-avatar" style="background:${meta.bg}">${p.avatar||'👤'}</div>
+        <div class="post-meta">
+          <div class="post-author">${p.author} <span style="font-weight:600;color:var(--text-dim);font-size:12px">· ${p.city||''}</span></div>
+          <div class="post-info">малышу ${p.babyAge||'?'} · ${p.time||''}</div>
+        </div>
+        <div class="post-tag" style="background:${meta.bg};color:${meta.color}">${meta.label}</div>
+      </div>
+      <div class="post-body">${p.text}</div>
+      <div class="post-footer">
+        <button class="post-action" onclick="likePost(${p.id},this)">
+          <span>${p._liked?'❤️':'🤍'}</span> <span class="like-count">${p.likes}</span>
+        </button>
+        <button class="post-action">💬 Ответить</button>
+        <span class="post-time">${p.time||''}</span>
+      </div>
+    `;
+    feed.appendChild(card);
+  });
+  if(filtered.length===0){
+    feed.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px 20px;font-size:14px">Пока нет постов в этой категории 💬<br><br>Будь первой!</div>';
+  }
+}
+
+function likePost(id, btn){
+  const p = posts.find(p=>p.id===id);
+  if(!p) return;
+  p._liked = !p._liked;
+  p.likes += p._liked ? 1 : -1;
+  const icons = btn.querySelectorAll('span');
+  icons[0].textContent = p._liked ? '❤️' : '🤍';
+  icons[1].textContent = p.likes;
+}
+
+function selectTag(el, tag){
+  selectedPostTag = tag;
+  document.querySelectorAll('.np-tag').forEach(t=>t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function submitPost(){
+  const text = document.getElementById('np-text').value.trim();
+  if(!text){ showToast('Напиши что-нибудь 💬'); return; }
+  const newPost = {
+    id: Date.now(), _user: true,
+    author: state.baby.name ? `Мама ${state.baby.name}` : 'Мама',
+    city: 'Мой город',
+    babyAge: state.baby.birthDate ? (() => { const m = getAgeMonths(); return m<12?`${m}м`:`${Math.floor(m/12)}г`; })() : '?',
+    tag: selectedPostTag || 'support',
+    text, likes: 0, time: 'только что', avatar: '🌟'
+  };
+  posts.unshift(newPost);
+  savePosts();
+  closeModal('modal-post');
+  document.getElementById('np-text').value = '';
+  selectedPostTag = '';
+  document.querySelectorAll('.np-tag').forEach(t=>t.classList.remove('selected'));
+  if(currentNav==='community') renderCommunity();
+  showToast('Опубликовано! ✨');
+}
+
+// ── BABY INFO ──
+function getBabyInfoData(ageMonths){
+  const articles = [];
+
+  if(ageMonths < 2){
+    articles.push({ emoji:'😴', tag:'Сон', title:'Сон новорождённого', body:'Новорождённые спят 16-20 часов в сутки короткими отрезками по 2-4 часа. Это нормально — их желудок маленький и требует частого кормления. Не жди долгих ночных промежутков раньше 6-8 недель.' });
+    articles.push({ emoji:'🤱', tag:'Кормление', title:'Кормление по требованию', body:'В первые недели кормление по требованию помогает установить лактацию. Частые прикладывания (8-12 раз в сутки) — это норма, не признак нехватки молока.' });
+    articles.push({ emoji:'💛', tag:'Развитие', title:'Что умеет малыш', body:'Фокусирует взгляд на лицах на расстоянии 20-30 см. Реагирует на голос мамы. Сжимает пальчик, вложенный в ладонь. Это база — всё остальное впереди!' });
+  } else if(ageMonths < 4){
+    articles.push({ emoji:'😄', tag:'Развитие', title:'Первая улыбка и гуление', body:'В 2-3 месяца появляется социальная улыбка — малыш улыбается в ответ на твоё лицо и голос. Гуление («агу», «эхе») — первые попытки общения. Разговаривай с ним как можно больше!' });
+    articles.push({ emoji:'😴', tag:'Сон', title:'Формирование режима', body:'В 2-3 месяца начинает формироваться циркадный ритм. Помогает: затемнение на ночной сон, разница в активности днём и ночью, постоянное время укладывания.' });
+    articles.push({ emoji:'🌱', tag:'Скачок роста', title:'Скачок в 3 месяца', body:'Около 12 недель — один из первых скачков роста. Малыш может стать беспокойнее, чаще требовать грудь, хуже спать. Обычно длится 1-2 недели. Больше контакта и терпения!' });
+  } else if(ageMonths < 6){
+    articles.push({ emoji:'🔄', tag:'Сон', title:'Регресс в 4 месяца', body:'Самый известный регресс сна. Малыш учится новому циклу сна и начинает просыпаться между циклами. Это не навсегда! Главное — последовательность в укладывании и не вводить новых костылей.' });
+    articles.push({ emoji:'🎯', tag:'Развитие', title:'Интерес к миру', body:'Малыш тянется к предметам, захватывает игрушки, переворачивается со спины на живот. Подвесь развивающую дугу, давай грызунки разной текстуры.' });
+    articles.push({ emoji:'💪', tag:'Физическое', title:'Тummy time важен!', body:'Упражнения на животе укрепляют мышцы шеи и спины, готовят к ползанию. Цель — 30 минут в день суммарно. Начинай с 3-5 минут после еды.' });
+  } else if(ageMonths < 9){
+    articles.push({ emoji:'🥣', tag:'Питание', title:'Пора начинать прикорм!', body:'ВОЗ рекомендует начинать прикорм в 6 месяцев. Начни с овощных пюре (кабачок, брокколи, цветная капуста) или каш без глютена. По 1 новому продукту в 3-5 дней. Грудное молоко или смесь — главная еда ещё до 1 года.' });
+    articles.push({ emoji:'🌙', tag:'Сон', title:'Оконо бодрствования 2-2.5ч', body:'В 6-8 месяцев малышу комфортно бодрствовать 2-2.5 часа. Обычно 2-3 дневных сна. Признаки усталости: трёт глаза, теряет интерес к игрушкам, смотрит в сторону.' });
+    articles.push({ emoji:'👋', tag:'Развитие', title:'Первое «мама» и имитация', body:'Начинается лепет (ба-ба, ма-ма, да-да) — пока без смысла, но это основа речи. Малыш машет ручкой «пока», хлопает в ладоши, радуется своему отражению.' });
+  } else if(ageMonths < 12){
+    articles.push({ emoji:'🚶', tag:'Развитие', title:'На пути к ходьбе', body:'8-10 месяцев — время ползания, подтягивания, вставания у опоры. Не торопи с ходьбой — ползание важно для развития мозга и координации. Убери острые углы и закрой розетки.' });
+    articles.push({ emoji:'😴', tag:'Сон', title:'Переход на 2 сна', body:'Около 8-9 месяцев многие малыши готовы перейти с 3 снов на 2. Признаки: стабильно отказывается от 3-го сна или третий сон мешает ночному.' });
+    articles.push({ emoji:'🥕', tag:'Питание', title:'Расширение прикорма', body:'К 9-10 месяцам малыш может есть мягкие кусочки, пить из поильника, держать ложку. Вводи мясо, рыбу, яйца. Исследование еды руками — это норма и польза!' });
+  } else if(ageMonths < 18){
+    articles.push({ emoji:'🗣️', tag:'Развитие', title:'Первые слова', body:'К году в среднем 2-10 слов. Главное — понимание: малыш выполняет простые просьбы. Читай вслух, называй предметы, пой песенки — это лучшее для развития речи.' });
+    articles.push({ emoji:'😴', tag:'Сон', title:'Переход на 1 сон', body:'Между 12-18 месяцами большинство детей переходят на один дневной сон. Переход может занять 1-2 месяца. В этот период дневной сон сдвигается на 12:00-13:00.' });
+    articles.push({ emoji:'🎭', tag:'Поведение', title:'Первые капризы', body:'Около года начинаются первые «кризисы» — ребёнок хочет самостоятельности, но не умеет управлять эмоциями. Это не манипуляция, а незрелость нервной системы. Сочувствие + границы = баланс.' });
+  } else {
+    articles.push({ emoji:'🌟', tag:'Развитие', title:'Активное развитие речи', body:'После 18 месяцев словарный запас растёт взрывообразно. Норма — 50+ слов к 2 годам. Читай, обсуждай картинки, задавай вопросы. Экраны — минимум.' });
+    articles.push({ emoji:'😴', tag:'Сон', title:'Один дневной сон', body:'После 18 месяцев — один дневной сон около 13:00, 1-2.5 часа. Ночной сон 11-12 часов. Ритуал перед сном критически важен — одинаковая последовательность снижает время засыпания.' });
+    articles.push({ emoji:'🤝', tag:'Социальное', title:'Игра рядом', body:'До 2-3 лет дети играют «рядом», а не «вместе» — это норма. Параллельная игра — важный этап социального развития. Не заставляй делиться насильно.' });
+  }
+
+  // Add leap info
+  const leaps = [
+    { w: 5, name: 'Мир ощущений', desc: 'Малыш замечает больше деталей вокруг' },
+    { w: 8, name: 'Мир паттернов', desc: 'Первые предсказуемые последовательности' },
+    { w: 12, name: 'Мир плавных переходов', desc: 'Контроль тела, первые перевороты' },
+    { w: 19, name: 'Мир событий', desc: 'Понимает причинно-следственные связи' },
+    { w: 26, name: 'Мир взаимосвязей', desc: 'Расстояние между вещами и людьми' },
+    { w: 37, name: 'Мир категорий', desc: 'Классификация, «своё» и «чужое»' },
+    { w: 46, name: 'Мир последовательностей', desc: 'Планирование простых действий' },
+    { w: 55, name: 'Мир программ', desc: 'Гибкое мышление, первые капризы' },
+  ];
+  const weeksOld = Math.round(ageMonths * 4.33);
+  const nextLeap = leaps.find(l => l.w > weeksOld - 1 && l.w <= weeksOld + 3);
+  if(nextLeap){
+    articles.unshift({ emoji:'🚀', tag:'Скачок роста', title:`Скачок ${nextLeap.w}: «${nextLeap.name}»`, body:`Сейчас или совсем скоро — скачок роста «${nextLeap.name}». ${nextLeap.desc}. В этот период малыш может быть беспокойнее, хуже спать и больше просить маму. Это значит — мозг активно развивается! 🧠` });
+  }
+  return articles;
+}
+
+function renderBabyInfo(){
+  const ageMonths = getAgeMonths();
+  const n = state.baby.name || 'малыш';
+
+  // Age string
+  let ageStr;
+  if(ageMonths < 12) ageStr = `${ageMonths} месяц${ageMonths===1?'':ageMonths<5?'а':'ев'}`;
+  else { const y=Math.floor(ageMonths/12), m=ageMonths%12; ageStr = `${y} год${y===1?'':y<5?'а':'ов'}${m?` ${m}м`:''}`; }
+
+  // Emoji by age
+  const emojis = ['🐣','🌱','🌿','🌸','⭐','🌟','🦋','🌈','🎈','🎀','🎊','🎯','🚀'];
+  const emojiIdx = Math.min(Math.floor(ageMonths/2), emojis.length-1);
+
+  // Stage
+  const stages = [
+    [0,'Новорождённый · 0-2м'],
+    [2,'Младенец · 2-4м'],
+    [4,'Активный исследователь · 4-6м'],
+    [6,'Маленький едок · 6-9м'],
+    [9,'Почти ходячий · 9-12м'],
+    [12,'Малыш · 1-1.5г'],
+    [18,'Деятельный непоседа · 1.5-2г'],
+  ];
+  const stage = stages.filter(s=>s[0]<=ageMonths).pop()?.[1] || 'Растёт!';
+
+  document.getElementById('info-emoji').textContent = emojis[emojiIdx];
+  document.getElementById('info-age-str').textContent = ageStr;
+  document.getElementById('info-baby-name').textContent = n;
+  document.getElementById('info-stage').textContent = stage;
+
+  const articles = getBabyInfoData(ageMonths);
+  const container = document.getElementById('info-articles');
+  container.innerHTML = '';
+  articles.forEach((a,i)=>{
+    const card = document.createElement('div');
+    card.className = 'article-card';
+    card.style.animationDelay = `${i*0.06}s`;
+    card.innerHTML = `
+      <div class="article-header" onclick="toggleArticle(this)">
+        <div class="article-emoji">${a.emoji}</div>
+        <div style="flex:1">
+          <div class="article-tag">${a.tag}</div>
+          <div class="article-title">${a.title}</div>
+        </div>
+        <div class="article-arrow">›</div>
+      </div>
+      <div class="article-body">${a.body}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function toggleArticle(header){
+  const card = header.closest('.article-card');
+  const body = card.querySelector('.article-body');
+  const arrow = card.querySelector('.article-arrow');
+  const open = body.classList.toggle('open');
+  card.classList.toggle('expanded', open);
+}
+
+function renderProfile(){
+  const n = state.baby.name || '—';
+  const ageMonths = getAgeMonths();
+  const gender = state.baby.gender==='boy' ? '👦' : state.baby.gender==='girl' ? '👧' : '👶';
+  document.getElementById('profile-emoji').textContent = gender;
+  document.getElementById('profile-name').textContent = n;
+  const ageStr = ageMonths < 12 ? `${ageMonths}м` : `${Math.floor(ageMonths/12)}г ${ageMonths%12}м`;
+  document.getElementById('profile-age').textContent = `Возраст: ${ageStr}`;
+}
+
+function resetApp(){
+  if(confirm('Сбросить все данные?')){
+    localStorage.clear();
+    location.reload();
+  }
+}
 
 // ── TOAST ──
 function showToast(msg){

@@ -1453,12 +1453,25 @@ function goMain(){
 // ── INIT MAIN ──
 function initMain(){
   const n = state.baby.name;
-  document.getElementById('main-avatar').textContent = n[0].toUpperCase();
+  document.getElementById('main-avatar').textContent = (n||'?')[0].toUpperCase();
   updateAgeBadge();
   renderWeekStrip();
   renderAll();
   startClockTick();
   switchNav('sleep');
+}
+
+function updateAgeBadge(){
+  const months = getAgeMonths();
+  let ageStr;
+  if(months < 12) ageStr = `${months}м`;
+  else { const y=Math.floor(months/12),m=months%12; ageStr=`${y}г${m?` ${m}м`:''}`; }
+  // Update profile avatar age
+  const pabAge = document.getElementById('pab-age');
+  if(pabAge) pabAge.textContent = ageStr;
+  // Keep old badge too if present
+  const badge = document.getElementById('age-badge');
+  if(badge) badge.textContent = ageStr;
 }
 
 function updateAgeBadge(){
@@ -1851,26 +1864,19 @@ function getSleepRange(ageMonths){
 function renderStatsRow(){
   const entries = getDayEntries(state.selectedDate);
   const sleeps = entries.filter(e=>e.type==='sleep');
-  const ageMonths = getAgeMonths();
-
-  // ── 1. СУТКИ: ночной сон предыдущей ночи + все дневные сны + дневные ВБ ──
-  // Берём все завершённые сны за сегодня (включая начавшиеся вчера ночью)
-  // + текущее бодрствование если уже есть первое событие
+  const naps = sleeps.filter(e=>e.time.getHours()>=6 && e.time.getHours()<20);
   const completedSleeps = sleeps.filter(e=>e.end).sort((a,b)=>a.time-b.time);
+  const sortedByEnd = completedSleeps.slice().sort((a,b)=>b.end-a.end);
+  const lastSleep = sortedByEnd[0];
+
+  // 1. Сутки — время с первого события дня
   let sutkaMin = 0;
-  // Сон за сутки = сумма всех снов
-  sutkaMin = completedSleeps.reduce((s,e)=>s+Math.floor((e.end-e.time)/60000), 0);
-  // + бодрствование с первого события до сейчас (если есть данные)
   if(completedSleeps.length > 0){
-    const firstEvent = completedSleeps[0];
-    const totalDayMin = Math.floor((new Date() - firstEvent.time)/60000);
-    sutkaMin = totalDayMin; // показываем сколько всего прошло с начала дня
+    sutkaMin = Math.floor((new Date() - completedSleeps[0].time)/60000);
   }
   document.getElementById('ms-day24').textContent = sutkaMin ? formatDur(sutkaMin) : '—';
 
-  // ── 2. БОДРСТВУЕТ ПОСЛЕ СНА ──
-  const sortedByEnd = completedSleeps.slice().sort((a,b)=>b.end-a.end);
-  const lastSleep = sortedByEnd[0];
+  // 2. Бодрствует после сна
   let awakeSinceStr = '—';
   if(state.tracking?.type==='sleep'){
     awakeSinceStr = '😴';
@@ -1878,12 +1884,17 @@ function renderStatsRow(){
     const d = Math.floor((new Date() - lastSleep.end)/60000);
     if(d >= 0) awakeSinceStr = formatDur(d);
   }
-  document.getElementById('awake-since-val').textContent = awakeSinceStr;
   document.getElementById('ms-awake-since').textContent = awakeSinceStr;
+  // keep awake-since-val in sync if element exists
+  const asv = document.getElementById('awake-since-val');
+  if(asv) asv.textContent = awakeSinceStr;
 
-  // ── 3. ВСЕГО СНА с диапазоном по возрасту ──
+  // 3. Дневных снов
+  document.getElementById('ms-naps').textContent = naps.length || '—';
+
+  // 4. Всего сна с диапазоном по возрасту
   const totalSleepMin = completedSleeps.reduce((s,e)=>s+Math.floor((e.end-e.time)/60000), 0);
-  const range = getSleepRange(ageMonths);
+  const range = getSleepRange(getAgeMonths());
   document.getElementById('ms-total').textContent = totalSleepMin ? formatDur(totalSleepMin) : '—';
   document.getElementById('ms-total-lbl').textContent = `Всего сна (${range})`;
 }
@@ -1990,6 +2001,7 @@ function updateTrackerBtn(){
   const label = document.getElementById('tb-label');
   const timer = document.getElementById('tb-timer');
   const icon = btn.querySelector('.tb-icon');
+  const navTimer = document.getElementById('nav-sleep-timer');
 
   btn.querySelectorAll('.pulse-ring').forEach(r=>r.remove());
 
@@ -2000,34 +2012,51 @@ function updateTrackerBtn(){
     timer.style.display = 'flex';
     const ring = document.createElement('div'); ring.className='pulse-ring';
     btn.insertBefore(ring, btn.firstChild);
+    if(navTimer) navTimer.style.display = 'block';
   } else if(state.tracking && state.tracking.type==='wake'){
     btn.className = 'tracker-btn awake';
     label.textContent = 'Малыш бодрствует';
     icon.textContent = '😴';
     timer.style.display = 'flex';
+    if(navTimer) navTimer.style.display = 'none';
   } else {
     btn.className = 'tracker-btn idle';
-    label.textContent = `Давай начнём`;
+    label.textContent = 'Давай начнём';
     icon.textContent = '▶';
     timer.style.display = 'none';
+    if(navTimer) navTimer.style.display = 'none';
   }
 }
 
 // ── CLOCK TICK ──
 function startClockTick(){
-  setInterval(()=>{
+  function tick(){
     const isToday = state.selectedDate.toDateString()===new Date().toDateString();
     if(isToday){
-      document.getElementById('arc-time').textContent = formatTime(new Date());
+      const arcTimeEl = document.getElementById('arc-time');
+      if(arcTimeEl) arcTimeEl.textContent = formatTime(new Date());
       if(state.tracking){
         const dur = Math.floor((new Date()-state.tracking.start)/60000);
-        document.getElementById('tb-timer').textContent = formatDur(dur);
-        document.getElementById('arc-subtitle').textContent = state.tracking.type==='sleep'
-          ? `Спит: ${formatDur(dur)}` : `Бодрствует: ${formatDur(dur)}`;
+        const timerEl = document.getElementById('tb-timer');
+        if(timerEl) timerEl.textContent = formatDur(dur);
       }
-      renderStatsRow(); // refresh awake-since live
+      renderStatsRow();
+      renderArc();
     }
-  }, 10000); // every 10s is enough for minute-level counters
+    // Nav sleep timer — always tick if sleeping
+    const navTimer = document.getElementById('nav-sleep-timer');
+    if(navTimer){
+      if(state.tracking?.type==='sleep'){
+        const dur = Math.floor((new Date()-state.tracking.start)/60000);
+        const h=Math.floor(dur/60), m=dur%60;
+        navTimer.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        navTimer.style.display = 'block';
+      } else {
+        navTimer.style.display = 'none';
+      }
+    }
+  }
+  setInterval(tick, 1000);
 }
 
 // ── ENTRY EDIT with drum picker ──
@@ -2170,15 +2199,18 @@ function epDelete(){
 let currentNav = 'sleep';
 function switchNav(tab){
   currentNav = tab;
-  // Update nav buttons
-  ['community','sleep','info','profile'].forEach(t=>{
+  // Nav sleep pill active state
+  const sleepPill = document.getElementById('nb-sleep');
+  if(sleepPill) sleepPill.classList.toggle('active', tab==='sleep');
+  // Regular nav btns
+  ['community','info'].forEach(t=>{
     const btn = document.getElementById('nb-'+t);
     if(btn) btn.classList.toggle('active', t===tab);
   });
   // Show/hide tab screens
   ['sleep','community','info','profile'].forEach(t=>{
     const el = document.getElementById('tab-'+t);
-    if(el){ el.classList.toggle('active', t===tab); }
+    if(el) el.classList.toggle('active', t===tab);
   });
   // Tracker bar only on sleep tab
   const tb = document.getElementById('tracker-bar');
@@ -2186,11 +2218,10 @@ function switchNav(tab){
   // Lazy render
   if(tab==='community') renderCommunity();
   if(tab==='info') renderBabyInfo();
-  if(tab==='profile') renderProfile();
 }
 
 function openQuickAdd(){
-  openModal(); // reuse existing sleep modal
+  openModal();
 }
 
 // ── COMMUNITY ──
@@ -2427,10 +2458,54 @@ function renderProfile(){
   document.getElementById('profile-age').textContent = `Возраст: ${ageStr}`;
 }
 
-function resetApp(){
-  if(confirm('Сбросить все данные?')){
-    localStorage.clear();
-    location.reload();
+// ── PROFILE MODAL ──
+function openProfileModal(){
+  const n = state.baby.name || '';
+  const ageMonths = getAgeMonths();
+  const ageStr = ageMonths < 12 ? `${ageMonths}м` : `${Math.floor(ageMonths/12)}г ${ageMonths%12}м`;
+  const gender = state.baby.gender==='boy'?'👦':state.baby.gender==='girl'?'👧':'👶';
+
+  document.getElementById('pm-baby-emoji').textContent = gender;
+  document.getElementById('pm-baby-name').textContent = n || '—';
+  document.getElementById('pm-baby-age').textContent = ageStr;
+  document.getElementById('pm-name-inp').value = n;
+  document.getElementById('pm-birth-inp').value = state.baby.birthDate || '';
+  document.getElementById('pm-g-boy').classList.toggle('active', state.baby.gender==='boy');
+  document.getElementById('pm-g-girl').classList.toggle('active', state.baby.gender==='girl');
+
+  document.getElementById('modal-profile').classList.remove('hidden');
+}
+
+let pmGender = '';
+function pmSelectGender(g){
+  pmGender = g;
+  document.getElementById('pm-g-boy').classList.toggle('active', g==='boy');
+  document.getElementById('pm-g-girl').classList.toggle('active', g==='girl');
+}
+
+function pmSaveBaby(){
+  const name = document.getElementById('pm-name-inp').value.trim();
+  const birth = document.getElementById('pm-birth-inp').value;
+  if(name) state.baby.name = name;
+  if(birth) state.baby.birthDate = birth;
+  if(pmGender) state.baby.gender = pmGender;
+  save();
+  // Update header
+  document.getElementById('main-avatar').textContent = (state.baby.name||'?')[0].toUpperCase();
+  updateAgeBadge();
+  showToast('Сохранено ✓');
+  closeModal('modal-profile');
+  renderAll();
+}
+
+function pmLogout(){
+  closeModal('modal-profile');
+  showToast('Выход из аккаунта...');
+}
+
+function pmDeleteAccount(){
+  if(confirm('Удалить аккаунт и все данные?')){
+    localStorage.clear(); location.reload();
   }
 }
 

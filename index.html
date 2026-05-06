@@ -970,14 +970,14 @@ html, body {
   <div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div>
   <div class="onboard-wrap">
     <h1 class="onboard-question">Как назвали<br>малыша?</h1>
-    <div class="onboard-spacer"></div>
+    <div style="flex:1;min-height:24px"></div>
     <div class="gender-row">
-      <button class="gender-btn" id="g-boy" onclick="selectGender('boy')">👦 Мальчик</button>
-      <button class="gender-btn" id="g-girl" onclick="selectGender('girl')">👧 Девочка</button>
+      <button type="button" class="gender-btn" id="g-boy" onclick="selectGender('boy')">👦 Мальчик</button>
+      <button type="button" class="gender-btn" id="g-girl" onclick="selectGender('girl')">👧 Девочка</button>
     </div>
-    <input class="name-input" id="baby-name-input" type="text" placeholder="Имя" maxlength="20"
-      oninput="checkOb2()" onkeydown="if(event.key==='Enter')goMain()">
-    <button class="btn-next" id="btn-ob2" onclick="goMain()" disabled>Далее</button>
+    <input class="name-input" id="baby-name-input" type="text" placeholder="Имя малыша" maxlength="20"
+      oninput="checkOb2()" onkeydown="if(event.key==='Enter'){if(this.value.trim())goMain();}">
+    <button type="button" class="btn-next" id="btn-ob2" onclick="goMain()" disabled>Далее →</button>
   </div>
 </div>
 
@@ -1026,7 +1026,7 @@ html, body {
       <div class="mini-stat">
         <span class="ms-icon">🛏️</span>
         <span class="ms-val" id="ms-naps">—</span>
-        <span class="ms-lbl">Дн. снов</span>
+        <span class="ms-lbl">Дн. сон</span>
       </div>
       <div class="mini-stat">
         <span class="ms-icon">🌙</span>
@@ -1241,7 +1241,11 @@ html, body {
 </div>
 
 <script>
-// ── STARS ──
+// ── SAFE DOM HELPER ──
+function setEl(id, val, prop='textContent'){
+  const el = document.getElementById(id);
+  if(el) el[prop] = val;
+}
 (function(){
   const c = document.getElementById('stars-canvas');
   const ctx = c.getContext('2d');
@@ -1383,8 +1387,7 @@ function calRender(){
         calSelectedDate = cellDate;
         state.baby.birthDate = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         document.getElementById('btn-ob1').disabled = false;
-        document.getElementById('cal-selected-label').textContent =
-          `🎂 ${d} ${CAL_MONTHS_GEN[calMonth]} ${calYear}`;
+        setEl('cal-selected-label', `🎂 ${d} ${CAL_MONTHS_GEN[calMonth]} ${calYear}`);
         calRender();
       };
     }
@@ -1453,7 +1456,7 @@ function goMain(){
 // ── INIT MAIN ──
 function initMain(){
   const n = state.baby.name;
-  document.getElementById('main-avatar').textContent = (n||'?')[0].toUpperCase();
+  setEl('main-avatar', (n||'?')[0].toUpperCase());
   updateAgeBadge();
   renderWeekStrip();
   renderAll();
@@ -1466,25 +1469,15 @@ function updateAgeBadge(){
   let ageStr;
   if(months < 12) ageStr = `${months}м`;
   else { const y=Math.floor(months/12),m=months%12; ageStr=`${y}г${m?` ${m}м`:''}`; }
-  // Update profile avatar age
-  const pabAge = document.getElementById('pab-age');
-  if(pabAge) pabAge.textContent = ageStr;
-  // Keep old badge too if present
-  const badge = document.getElementById('age-badge');
-  if(badge) badge.textContent = ageStr;
-}
-
-function updateAgeBadge(){
-  const months = getAgeMonths();
-  const badge = document.getElementById('age-badge');
-  if(months < 12) badge.textContent = `${months}м`;
-  else badge.textContent = `${Math.floor(months/12)}г ${months%12}м`;
+  setEl('pab-age', ageStr);
+  setEl('age-badge', ageStr);
 }
 
 // ── WEEK STRIP ──
 const DAY_NAMES = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 function renderWeekStrip(){
   const strip = document.getElementById('week-strip');
+  if(!strip) return;
   strip.innerHTML = '';
   const today = new Date();
   // Show Mon-Sun of current week
@@ -1507,11 +1500,13 @@ function renderWeekStrip(){
   const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   const sel = state.selectedDate;
   const isToday = sel.toDateString()===new Date().toDateString();
-  document.getElementById('hd-text').textContent = isToday ? 'сегодня' : `${sel.getDate()} ${months[sel.getMonth()]}`;
+  setEl('hd-text', isToday ? 'сегодня' : `${sel.getDate()} ${months[sel.getMonth()]}`);
 }
 
 // ── RENDER ALL ──
 function renderAll(){
+  if(!document.getElementById('screen-main') ||
+     document.getElementById('screen-main').classList.contains('hidden')) return;
   renderLog();
   renderArc();
   renderStatsRow();
@@ -1527,8 +1522,9 @@ function getDayEntries(d){
 const NAP_ORDINALS = ['Первый','Второй','Третий','Четвёртый','Пятый','Шестой'];
 
 function renderLog(){
-  const entries = getDayEntries(state.selectedDate); // sorted asc by time
   const log = document.getElementById('sleep-log');
+  if(!log) return;
+  const entries = getDayEntries(state.selectedDate); // sorted asc by time
   log.innerHTML = '';
 
   const isToday = state.selectedDate.toDateString()===new Date().toDateString();
@@ -1665,6 +1661,7 @@ function formatDur(min){
 
 // ── RENDER ARC ──
 function renderArc(){
+  if(!document.getElementById('arc-bg')) return;
   const entries = getDayEntries(state.selectedDate);
   const isToday = state.selectedDate.toDateString()===new Date().toDateString();
   const now = new Date();
@@ -1764,9 +1761,9 @@ function renderArc(){
 
   if(!isToday){
     const totalMin = sleeps.reduce((s,e)=>s+(e.end?Math.floor((e.end-e.time)/60000):0),0);
-    document.getElementById('arc-label').textContent = 'Всего сна';
-    document.getElementById('arc-time').textContent = totalMin ? formatDur(totalMin) : '—';
-    document.getElementById('arc-subtitle').textContent = '';
+    setEl('arc-label', 'Всего сна');
+    setEl('arc-time', totalMin ? formatDur(totalMin) : '—');
+    setEl('arc-subtitle', '');
     return;
   }
 
@@ -1775,9 +1772,9 @@ function renderArc(){
     const dur = Math.floor((now - state.tracking.start)/60000);
     const h = Math.floor(dur/60), m = dur%60;
     const durDisplay = h > 0 ? `${h}:${String(m).padStart(2,'0')}` : `${m} мин`;
-    document.getElementById('arc-label').textContent = 'Спит';
-    document.getElementById('arc-time').textContent = durDisplay;
-    document.getElementById('arc-subtitle').textContent = '';
+    setEl('arc-label', 'Спит');
+    setEl('arc-time', durDisplay);
+    setEl('arc-subtitle', '');
     return;
   }
 
@@ -1795,20 +1792,20 @@ function renderArc(){
       // Countdown: show remaining minutes until sleep
       const h = Math.floor(minsUntil/60), m = minsUntil%60;
       const display = h > 0 ? `${h}:${String(m).padStart(2,'0')}` : `${minsUntil} мин`;
-      document.getElementById('arc-label').textContent = 'До сна';
-      document.getElementById('arc-time').textContent = display;
-      document.getElementById('arc-subtitle').textContent = `укладывать в ${formatTime(nextSleepTime)}`;
+      setEl('arc-label', 'До сна');
+      setEl('arc-time', display);
+      setEl('arc-subtitle', `укладывать в ${formatTime(nextSleepTime)}`);
     } else {
       // Overdue
-      document.getElementById('arc-label').textContent = 'Пора спать';
+      setEl('arc-label', 'Пора спать');
       const overMin = Math.abs(minsUntil);
-      document.getElementById('arc-time').textContent = overMin < 60 ? `${overMin} мин` : formatDur(overMin);
-      document.getElementById('arc-subtitle').textContent = 'окно бодрствования истекло';
+      setEl('arc-time', overMin < 60 ? `${overMin} мин` : formatDur(overMin));
+      setEl('arc-subtitle', 'окно бодрствования истекло');
     }
   } else {
-    document.getElementById('arc-label').textContent = 'Привет!';
-    document.getElementById('arc-time').textContent = state.baby.name || '🌙';
-    document.getElementById('arc-subtitle').textContent = 'Добавь первый сон';
+    setEl('arc-label', 'Привет!');
+    setEl('arc-time', state.baby.name || '🌙');
+    setEl('arc-subtitle', 'Добавь первый сон');
   }
 }
 
@@ -1862,6 +1859,7 @@ function getSleepRange(ageMonths){
 
 // ── RENDER STATS ROW ──
 function renderStatsRow(){
+  if(!document.getElementById('ms-day24')) return;
   const entries = getDayEntries(state.selectedDate);
   const sleeps = entries.filter(e=>e.type==='sleep');
   const naps = sleeps.filter(e=>e.time.getHours()>=6 && e.time.getHours()<20);
@@ -1874,29 +1872,29 @@ function renderStatsRow(){
   if(completedSleeps.length > 0){
     sutkaMin = Math.floor((new Date() - completedSleeps[0].time)/60000);
   }
-  document.getElementById('ms-day24').textContent = sutkaMin ? formatDur(sutkaMin) : '—';
+  setEl('ms-day24', sutkaMin ? formatDur(sutkaMin) : '—');
 
   // 2. Бодрствует после сна
   let awakeSinceStr = '—';
-  if(state.tracking?.type==='sleep'){
+  if((state.tracking && state.tracking.type)==='sleep'){
     awakeSinceStr = '😴';
   } else if(lastSleep){
     const d = Math.floor((new Date() - lastSleep.end)/60000);
     if(d >= 0) awakeSinceStr = formatDur(d);
   }
-  document.getElementById('ms-awake-since').textContent = awakeSinceStr;
+  setEl('ms-awake-since', awakeSinceStr);
   // keep awake-since-val in sync if element exists
   const asv = document.getElementById('awake-since-val');
   if(asv) asv.textContent = awakeSinceStr;
 
   // 3. Дневных снов
-  document.getElementById('ms-naps').textContent = naps.length || '—';
+  setEl('ms-naps', naps.length || '—');
 
   // 4. Всего сна с диапазоном по возрасту
   const totalSleepMin = completedSleeps.reduce((s,e)=>s+Math.floor((e.end-e.time)/60000), 0);
   const range = getSleepRange(getAgeMonths());
-  document.getElementById('ms-total').textContent = totalSleepMin ? formatDur(totalSleepMin) : '—';
-  document.getElementById('ms-total-lbl').textContent = `Всего сна (${range})`;
+  setEl('ms-total', totalSleepMin ? formatDur(totalSleepMin) : '—');
+  setEl('ms-total-lbl', `Всего сна (${range})`);
 }
 
 // ── TRACKER ──
@@ -2046,7 +2044,7 @@ function startClockTick(){
     // Nav sleep timer — always tick if sleeping
     const navTimer = document.getElementById('nav-sleep-timer');
     if(navTimer){
-      if(state.tracking?.type==='sleep'){
+      if((state.tracking && state.tracking.type)==='sleep'){
         const dur = Math.floor((new Date()-state.tracking.start)/60000);
         const h=Math.floor(dur/60), m=dur%60;
         navTimer.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
@@ -2075,8 +2073,8 @@ function openEntryEdit(entry){
   const isNight = entry.type==='sleep' && (entry.time.getHours()>=20||entry.time.getHours()<6);
   const icon = entry.type==='sleep' ? (isNight?'🌙':'😴') : '🌅';
   const title = entry.type==='sleep' ? (isNight?'Ночной сон':'Дневной сон') : 'Проснулся';
-  document.getElementById('ep-icon').textContent = icon;
-  document.getElementById('ep-title').textContent = title;
+  setEl('ep-icon', icon);
+  setEl('ep-title', title);
 
   epRenderSegments();
   epSelectField('start');
@@ -2084,15 +2082,15 @@ function openEntryEdit(entry){
 }
 
 function epRenderSegments(){
-  document.getElementById('ep-seg-start-val').textContent = formatTime(epStartTime);
-  document.getElementById('ep-seg-end-val').textContent = epEndTime ? formatTime(epEndTime) : '—';
+  setEl('ep-seg-start-val', formatTime(epStartTime));
+  setEl('ep-seg-end-val', epEndTime ? formatTime(epEndTime) : '—');
 
   // Duration line
   if(epStartTime && epEndTime){
     const dur = Math.floor((epEndTime - epStartTime)/60000);
-    document.getElementById('ep-dur-line').textContent = dur > 0 ? `${formatDur(dur)} · ${formatTime(epStartTime)} — ${formatTime(epEndTime)}` : '';
+    setEl('ep-dur-line', dur > 0 ? `${formatDur(dur)} · ${formatTime(epStartTime)} — ${formatTime(epEndTime)}` : '');
   } else {
-    document.getElementById('ep-dur-line').textContent = '';
+    setEl('ep-dur-line', '');
   }
 }
 
@@ -2411,12 +2409,12 @@ function renderBabyInfo(){
     [12,'Малыш · 1-1.5г'],
     [18,'Деятельный непоседа · 1.5-2г'],
   ];
-  const stage = stages.filter(s=>s[0]<=ageMonths).pop()?.[1] || 'Растёт!';
+  const stage = (stages.filter(s=>s[0]<=ageMonths).pop() || []) || 'Растёт!';
 
-  document.getElementById('info-emoji').textContent = emojis[emojiIdx];
-  document.getElementById('info-age-str').textContent = ageStr;
-  document.getElementById('info-baby-name').textContent = n;
-  document.getElementById('info-stage').textContent = stage;
+  setEl('info-emoji', emojis[emojiIdx]);
+  setEl('info-age-str', ageStr);
+  setEl('info-baby-name', n);
+  setEl('info-stage', stage);
 
   const articles = getBabyInfoData(ageMonths);
   const container = document.getElementById('info-articles');
@@ -2452,10 +2450,10 @@ function renderProfile(){
   const n = state.baby.name || '—';
   const ageMonths = getAgeMonths();
   const gender = state.baby.gender==='boy' ? '👦' : state.baby.gender==='girl' ? '👧' : '👶';
-  document.getElementById('profile-emoji').textContent = gender;
-  document.getElementById('profile-name').textContent = n;
+  setEl('profile-emoji', gender);
+  setEl('profile-name', n);
   const ageStr = ageMonths < 12 ? `${ageMonths}м` : `${Math.floor(ageMonths/12)}г ${ageMonths%12}м`;
-  document.getElementById('profile-age').textContent = `Возраст: ${ageStr}`;
+  setEl('profile-age', `Возраст: ${ageStr}`);
 }
 
 // ── PROFILE MODAL ──
@@ -2465,9 +2463,9 @@ function openProfileModal(){
   const ageStr = ageMonths < 12 ? `${ageMonths}м` : `${Math.floor(ageMonths/12)}г ${ageMonths%12}м`;
   const gender = state.baby.gender==='boy'?'👦':state.baby.gender==='girl'?'👧':'👶';
 
-  document.getElementById('pm-baby-emoji').textContent = gender;
-  document.getElementById('pm-baby-name').textContent = n || '—';
-  document.getElementById('pm-baby-age').textContent = ageStr;
+  setEl('pm-baby-emoji', gender);
+  setEl('pm-baby-name', n || '—');
+  setEl('pm-baby-age', ageStr);
   document.getElementById('pm-name-inp').value = n;
   document.getElementById('pm-birth-inp').value = state.baby.birthDate || '';
   document.getElementById('pm-g-boy').classList.toggle('active', state.baby.gender==='boy');
@@ -2491,7 +2489,7 @@ function pmSaveBaby(){
   if(pmGender) state.baby.gender = pmGender;
   save();
   // Update header
-  document.getElementById('main-avatar').textContent = (state.baby.name||'?')[0].toUpperCase();
+  setEl('main-avatar', (state.baby.name||'?')[0].toUpperCase());
   updateAgeBadge();
   showToast('Сохранено ✓');
   closeModal('modal-profile');
@@ -2529,8 +2527,8 @@ function init(){
 
   // Telegram init
   try{
-    window.Telegram?.WebApp?.ready();
-    window.Telegram?.WebApp?.expand();
+    if(window.Telegram && window.Telegram.WebApp){ window.Telegram.WebApp.ready(); }
+    if(window.Telegram && window.Telegram.WebApp){ window.Telegram.WebApp.expand(); }
   } catch(e){}
 }
 

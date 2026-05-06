@@ -805,22 +805,23 @@ html, body {
     </div>
   </div>
 
+
   <!-- Compact mini stats: 3 items -->
   <div class="mini-stats">
     <div class="mini-stat">
-      <span class="ms-icon">⏰</span>
-      <span class="ms-val" id="ms-awake-since">—</span>
-      <span class="ms-lbl">бодрствует сейчас</span>
+      <span class="ms-icon">🌗</span>
+      <span class="ms-val" id="ms-day24">—</span>
+      <span class="ms-lbl">Сутки</span>
     </div>
     <div class="mini-stat">
-      <span class="ms-icon">📊</span>
-      <span class="ms-val" id="ms-day24">—</span>
-      <span class="ms-lbl">активных часов</span>
+      <span class="ms-icon">☀️</span>
+      <span class="ms-val" id="ms-awake-since">—</span>
+      <span class="ms-lbl">Бодрствует после сна</span>
     </div>
     <div class="mini-stat">
       <span class="ms-icon">🌙</span>
       <span class="ms-val" id="ms-total">—</span>
-      <span class="ms-lbl">всего сна</span>
+      <span class="ms-lbl" id="ms-total-lbl">Всего сна</span>
     </div>
   </div>
 
@@ -1406,9 +1407,9 @@ function renderArc(){
   // ── Center text logic ──
   const sleeps = entries.filter(e=>e.type==='sleep');
   const completedSleeps = sleeps.filter(e=>e.end).sort((a,b)=>a.time-b.time);
+  const lastSleep = completedSleeps[completedSleeps.length-1];
 
   if(!isToday){
-    // Past day: show total sleep
     const totalMin = sleeps.reduce((s,e)=>s+(e.end?Math.floor((e.end-e.time)/60000):0),0);
     document.getElementById('arc-label').textContent = 'Всего сна';
     document.getElementById('arc-time').textContent = totalMin ? formatDur(totalMin) : '—';
@@ -1417,51 +1418,73 @@ function renderArc(){
   }
 
   if(state.tracking && state.tracking.type==='sleep'){
-    // Currently sleeping
+    // Currently sleeping — show sleep duration big
     const dur = Math.floor((now - state.tracking.start)/60000);
+    const h = Math.floor(dur/60), m = dur%60;
+    const durDisplay = h > 0 ? `${h}:${String(m).padStart(2,'0')}` : `${m} мин`;
     document.getElementById('arc-label').textContent = 'Спит';
-    document.getElementById('arc-time').textContent = formatDur(dur);
-    document.getElementById('arc-subtitle').textContent = `с ${formatTime(state.tracking.start)}`;
+    document.getElementById('arc-time').textContent = durDisplay;
+    document.getElementById('arc-subtitle').textContent = '';
     return;
   }
 
-  // Estimate next sleep time based on age-appropriate wake windows
-  // Simple heuristic: last sleep end + typical wake window by age
-  const lastSleep = completedSleeps[completedSleeps.length-1];
+  // Awake — show countdown to next sleep
   if(lastSleep && lastSleep.end){
     const ageMonths = getAgeMonths();
-    // Wake window by age (minutes)
-    let wakeWindowMin = 120; // default 2h
-    if(ageMonths <= 3)  wakeWindowMin = 60;
-    else if(ageMonths <= 6)  wakeWindowMin = 90;
-    else if(ageMonths <= 9)  wakeWindowMin = 120;
-    else if(ageMonths <= 12) wakeWindowMin = 150;
-    else if(ageMonths <= 18) wakeWindowMin = 180;
-    else wakeWindowMin = 240;
+    // Count naps today (completed day sleeps)
+    const todayNaps = completedSleeps.filter(e => e.time.getHours()>=6 && e.time.getHours()<20).length;
+    const wakeWindowMin = getWakeWindow(ageMonths, todayNaps);
 
-    const nextSleep = new Date(lastSleep.end.getTime() + wakeWindowMin*60000);
-    const minsUntil = Math.floor((nextSleep - now)/60000);
+    const nextSleepTime = new Date(lastSleep.end.getTime() + wakeWindowMin*60000);
+    const minsUntil = Math.floor((nextSleepTime - now)/60000);
 
-    if(minsUntil > 0 && minsUntil <= 60){
-      document.getElementById('arc-label').textContent = 'Следующий сон';
-      document.getElementById('arc-time').textContent = formatTime(nextSleep);
-      document.getElementById('arc-subtitle').textContent = `через ${formatDur(minsUntil)}`;
-    } else if(minsUntil <= 0 && minsUntil >= -30){
-      document.getElementById('arc-label').textContent = 'Пора спать';
-      document.getElementById('arc-time').textContent = formatTime(now);
-      document.getElementById('arc-subtitle').textContent = '';
+    if(minsUntil > 0){
+      // Countdown: show remaining minutes until sleep
+      const h = Math.floor(minsUntil/60), m = minsUntil%60;
+      const display = h > 0 ? `${h}:${String(m).padStart(2,'0')}` : `${minsUntil} мин`;
+      document.getElementById('arc-label').textContent = 'До сна';
+      document.getElementById('arc-time').textContent = display;
+      document.getElementById('arc-subtitle').textContent = `укладывать в ${formatTime(nextSleepTime)}`;
     } else {
-      // Show current time + awake since
-      const awakeSinceMin = Math.floor((now - lastSleep.end)/60000);
-      document.getElementById('arc-label').textContent = 'Бодрствует';
-      document.getElementById('arc-time').textContent = formatDur(awakeSinceMin);
-      document.getElementById('arc-subtitle').textContent = `с ${formatTime(lastSleep.end)}`;
+      // Overdue
+      document.getElementById('arc-label').textContent = 'Пора спать';
+      const overMin = Math.abs(minsUntil);
+      document.getElementById('arc-time').textContent = overMin < 60 ? `${overMin} мин` : formatDur(overMin);
+      document.getElementById('arc-subtitle').textContent = 'окно бодрствования истекло';
     }
   } else {
-    // No data yet
-    document.getElementById('arc-label').textContent = 'Сейчас';
-    document.getElementById('arc-time').textContent = formatTime(now);
-    document.getElementById('arc-subtitle').textContent = '';
+    document.getElementById('arc-label').textContent = 'Привет!';
+    document.getElementById('arc-time').textContent = state.baby.name || '🌙';
+    document.getElementById('arc-subtitle').textContent = 'Добавь первый сон';
+  }
+}
+
+// ── WAKE WINDOW TABLE ──
+// Returns wake window in minutes based on age and how many naps already done today
+function getWakeWindow(ageMonths, napsToday){
+  // napsToday = completed naps (not counting current awake period)
+  // We're estimating the WW *before* the next nap/bedtime
+  if(ageMonths <= 3){
+    return 60;
+  } else if(ageMonths <= 5){
+    // 3 naps: WW ~1.5-2h
+    return napsToday < 2 ? 90 : 100;
+  } else if(ageMonths <= 7){
+    // 2-3 naps: WW ~2-2.5h
+    return napsToday < 2 ? 110 : 130;
+  } else if(ageMonths <= 9){
+    // 2 naps: WW ~2.5-3h
+    return napsToday < 1 ? 140 : 150;
+  } else if(ageMonths <= 12){
+    // 2 naps → 1 nap transition: WW ~3-3.5h
+    return napsToday < 1 ? 160 : 180;
+  } else if(ageMonths <= 18){
+    // 1 nap: WW ~4-5h
+    return napsToday < 1 ? 240 : 300;
+  } else if(ageMonths <= 24){
+    return 300;
+  } else {
+    return 360;
   }
 }
 
@@ -1474,15 +1497,40 @@ function getAgeMonths(){
   return Math.max(0,m);
 }
 
+// ── RECOMMENDED SLEEP RANGE BY AGE ──
+function getSleepRange(ageMonths){
+  if(ageMonths <= 3)  return '14-17';
+  if(ageMonths <= 6)  return '12-16';
+  if(ageMonths <= 12) return '12-16';
+  if(ageMonths <= 24) return '11-14';
+  if(ageMonths <= 36) return '10-13';
+  return '9-12';
+}
+
 // ── RENDER STATS ROW ──
 function renderStatsRow(){
   const entries = getDayEntries(state.selectedDate);
   const sleeps = entries.filter(e=>e.type==='sleep');
-  const totalSleepMin = sleeps.reduce((s,e)=>s+(e.end?Math.floor((e.end-e.time)/60000):0),0);
+  const ageMonths = getAgeMonths();
 
-  // 1. Бодрствование после последнего завершённого сна
-  const completedSleeps = sleeps.filter(e=>e.end).sort((a,b)=>b.end-a.end);
-  const lastSleep = completedSleeps[0];
+  // ── 1. СУТКИ: ночной сон предыдущей ночи + все дневные сны + дневные ВБ ──
+  // Берём все завершённые сны за сегодня (включая начавшиеся вчера ночью)
+  // + текущее бодрствование если уже есть первое событие
+  const completedSleeps = sleeps.filter(e=>e.end).sort((a,b)=>a.time-b.time);
+  let sutkaMin = 0;
+  // Сон за сутки = сумма всех снов
+  sutkaMin = completedSleeps.reduce((s,e)=>s+Math.floor((e.end-e.time)/60000), 0);
+  // + бодрствование с первого события до сейчас (если есть данные)
+  if(completedSleeps.length > 0){
+    const firstEvent = completedSleeps[0];
+    const totalDayMin = Math.floor((new Date() - firstEvent.time)/60000);
+    sutkaMin = totalDayMin; // показываем сколько всего прошло с начала дня
+  }
+  document.getElementById('ms-day24').textContent = sutkaMin ? formatDur(sutkaMin) : '—';
+
+  // ── 2. БОДРСТВУЕТ ПОСЛЕ СНА ──
+  const sortedByEnd = completedSleeps.slice().sort((a,b)=>b.end-a.end);
+  const lastSleep = sortedByEnd[0];
   let awakeSinceStr = '—';
   if(state.tracking?.type==='sleep'){
     awakeSinceStr = '😴';
@@ -1493,17 +1541,11 @@ function renderStatsRow(){
   document.getElementById('awake-since-val').textContent = awakeSinceStr;
   document.getElementById('ms-awake-since').textContent = awakeSinceStr;
 
-  // 2. «Активные часы» за сутки = ночной сон + дневной сон + текущее бодрствование (сумма = 24ч)
-  // Показываем одно число: сколько часов уже накоплено (сон + бодрствование с первого события)
-  let dayActiveMin = 0;
-  if(sleeps.length > 0){
-    const firstEvent = sleeps.slice().sort((a,b)=>a.time-b.time)[0];
-    dayActiveMin = Math.floor((new Date() - firstEvent.time)/60000);
-  }
-  document.getElementById('ms-day24').textContent = dayActiveMin ? formatDur(dayActiveMin) : '—';
-
-  // 3. Всего сна
+  // ── 3. ВСЕГО СНА с диапазоном по возрасту ──
+  const totalSleepMin = completedSleeps.reduce((s,e)=>s+Math.floor((e.end-e.time)/60000), 0);
+  const range = getSleepRange(ageMonths);
   document.getElementById('ms-total').textContent = totalSleepMin ? formatDur(totalSleepMin) : '—';
+  document.getElementById('ms-total-lbl').textContent = `Всего сна (${range})`;
 }
 
 // ── TRACKER ──

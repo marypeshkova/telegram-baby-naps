@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>LullaByte — трекер сна малыша</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #0a0b1a;
@@ -31,7 +31,7 @@
 html, body {
   width: 100%; height: 100%; overflow: hidden;
   background: var(--bg);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   color: var(--text);
   user-select: none;
 }
@@ -137,7 +137,7 @@ html, body {
 }
 .cal-cell:empty { pointer-events: none; }
 .cal-cell.other-month { color: var(--text-muted); }
-.cal-cell.future { color: var(--text-muted); pointer-events: none; opacity: 0.3; }
+.cal-cell.future { opacity: 0.4; pointer-events: none; cursor: default; }
 .cal-cell:not(.future):not(:empty):hover { background: rgba(255,255,255,0.08); }
 .cal-cell:not(.future):not(:empty):active { transform: scale(0.9); }
 .cal-cell.selected {
@@ -170,7 +170,7 @@ html, body {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
-  color: var(--text); font-family: 'Nunito', sans-serif;
+  color: var(--text); font-family: 'Roboto', sans-serif;
   font-size: 13px; font-weight: 700;
   cursor: pointer; transition: all 0.15s;
 }
@@ -193,7 +193,7 @@ html, body {
   border: 2px solid var(--border);
   border-radius: 14px;
   color: var(--text-dim);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 15px; font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -209,7 +209,7 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 14px;
   color: var(--text);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 16px;
   outline: none;
   margin-bottom: 16px;
@@ -225,7 +225,7 @@ html, body {
   border: none;
   border-radius: 22px;
   color: #fff;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 17px; font-weight: 800;
   cursor: pointer;
   margin-top: auto;
@@ -405,11 +405,11 @@ html, body {
 
 /* ── COMMUNITY SCREEN ── */
 .comm-header {
-  padding: 16px 20px 8px;
-  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.comm-title { font-family: 'DM Serif Display', serif; font-size: 26px; }
-.comm-subtitle { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+.comm-title { font-family: 'DM Serif Display', serif; font-size: 24px; }
+.comm-subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 .comm-filters {
   display: flex; gap: 8px; padding: 0 20px 12px;
   overflow-x: auto; scrollbar-width: none;
@@ -418,7 +418,7 @@ html, body {
 .comm-filter {
   padding: 6px 14px; border-radius: 20px;
   background: var(--card); border: 1px solid var(--border);
-  color: var(--text-dim); font-family: 'Nunito', sans-serif;
+  color: var(--text-dim); font-family: 'Roboto', sans-serif;
   font-size: 12px; font-weight: 700; white-space: nowrap;
   cursor: pointer; transition: all 0.2s; flex-shrink: 0;
 }
@@ -426,35 +426,61 @@ html, body {
   background: rgba(124,111,224,0.25);
   border-color: var(--purple-soft); color: var(--text);
 }
-.comm-feed { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+.comm-feed { padding: 0 16px 12px; display: flex; flex-direction: column; gap: 10px; }
 .post-card {
   background: var(--card2); border: 1px solid var(--border);
   border-radius: 18px; padding: 14px 16px;
   animation: fadeUp 0.3s ease both;
+  cursor: pointer; transition: background 0.15s;
 }
-.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.post-card:active { background: rgba(255,255,255,0.1); }
+.post-header {
+  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;
+}
 .post-avatar {
   width: 38px; height: 38px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; font-weight: 800; flex-shrink: 0;
 }
-.post-meta { flex: 1; }
-.post-author { font-size: 14px; font-weight: 800; }
+.post-meta { flex: 1; min-width: 0; }
+.post-author { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .post-info { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.post-tag-row { margin-bottom: 8px; }
 .post-tag {
-  font-size: 10px; font-weight: 700; padding: 3px 8px;
-  border-radius: 10px; flex-shrink: 0;
+  display: inline-block;
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px;
 }
-.post-body { font-size: 14px; line-height: 1.5; color: rgba(255,255,255,0.85); margin-bottom: 10px; }
-.post-footer { display: flex; align-items: center; gap: 14px; }
+.post-body { font-size: 14px; line-height: 1.55; color: rgba(255,255,255,0.85); margin-bottom: 10px; }
+.post-footer { display: flex; align-items: center; gap: 12px; }
 .post-action {
   display: flex; align-items: center; gap: 5px;
   font-size: 12px; color: var(--text-dim); font-weight: 600;
   cursor: pointer; background: none; border: none;
-  transition: color 0.2s;
+  font-family: 'Roboto', sans-serif;
+  transition: color 0.2s; padding: 0;
 }
 .post-action:active { color: var(--purple-soft); }
 .post-time { margin-left: auto; font-size: 11px; color: var(--text-muted); }
+.post-tg-link {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--purple-soft); font-weight: 600;
+  cursor: pointer; background: none; border: none;
+  font-family: 'Roboto', sans-serif;
+  margin-left: auto;
+}
+
+/* Write post button in comm header */
+.comm-write-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  border: none; color: #fff; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 3px 14px rgba(124,111,224,0.4);
+  transition: transform 0.15s;
+}
+.comm-write-btn:active { transform: scale(0.9); }
 
 /* New post button */
 .new-post-fab {
@@ -479,7 +505,7 @@ html, body {
   width: 100%; min-height: 100px;
   background: var(--card); border: 1px solid var(--border);
   border-radius: 14px; padding: 14px 16px;
-  color: var(--text); font-family: 'Nunito', sans-serif;
+  color: var(--text); font-family: 'Roboto', sans-serif;
   font-size: 15px; line-height: 1.5;
   outline: none; resize: none; margin-bottom: 12px;
 }
@@ -567,7 +593,7 @@ html, body {
 .ep-hdr-del { color: rgba(255,90,90,0.8); }
 .ep-hdr-save {
   color: var(--purple-soft);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 12px; font-weight: 700;
 }
 .ep-hdr-center {
@@ -721,7 +747,7 @@ html, body {
   padding: 16px 20px;
   border-radius: 22px;
   border: none;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 17px; font-weight: 800;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -857,7 +883,7 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 16px;
   color: var(--text);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 14px; font-weight: 700;
   cursor: pointer;
   text-align: center;
@@ -874,7 +900,7 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 12px;
   color: var(--text);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 18px; font-weight: 700;
   outline: none; margin-bottom: 12px;
   text-align: center;
@@ -1044,8 +1070,11 @@ html, body {
   <!-- ══ TAB: СООБЩЕСТВО ══ -->
   <div class="tab-screen" id="tab-community">
     <div class="comm-header">
-      <div class="comm-title">Сообщество 💬</div>
-      <div class="comm-subtitle">Мамы рядом и по всему миру</div>
+      <div style="flex:1">
+        <div class="comm-title">Сообщество 💬</div>
+        <div class="comm-subtitle">Мамы рядом и по всему миру</div>
+      </div>
+      <button class="comm-write-btn" onclick="openModal_post()" title="Написать пост">✏️</button>
     </div>
     <div class="comm-filters">
       <div class="comm-filter active" onclick="filterPosts('all',this)">Все</div>
@@ -1085,7 +1114,7 @@ html, body {
         <div style="font-size:20px;font-weight:800" id="profile-name">—</div>
         <div style="font-size:13px;color:var(--text-dim);margin-top:4px" id="profile-age">—</div>
       </div>
-      <button onclick="resetApp()" style="padding:16px;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:14px;color:#ff6060;font-family:Nunito,sans-serif;font-size:15px;font-weight:700;cursor:pointer">
+      <button onclick="resetApp()" style="padding:16px;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:14px;color:#ff6060;font-family:Roboto,sans-serif;font-size:15px;font-weight:700;cursor:pointer">
         Сбросить данные
       </button>
     </div>
@@ -1149,7 +1178,7 @@ html, body {
           <button class="gender-btn" id="pm-g-boy" onclick="pmSelectGender('boy')">👦 Мальчик</button>
           <button class="gender-btn" id="pm-g-girl" onclick="pmSelectGender('girl')">👧 Девочка</button>
         </div>
-        <button onclick="pmSaveBaby()" style="padding:12px;background:linear-gradient(135deg,var(--purple),var(--purple-soft));border:none;border-radius:12px;color:#fff;font-family:Nunito,sans-serif;font-size:14px;font-weight:800;cursor:pointer">Сохранить</button>
+        <button onclick="pmSaveBaby()" style="padding:12px;background:linear-gradient(135deg,var(--purple),var(--purple-soft));border:none;border-radius:12px;color:#fff;font-family:Roboto,sans-serif;font-size:14px;font-weight:800;cursor:pointer">Сохранить</button>
       </div>
     </div>
 
@@ -1161,10 +1190,10 @@ html, body {
     </div>
 
     <div style="display:flex;flex-direction:column;gap:8px;padding-bottom:4px">
-      <button onclick="pmLogout()" style="padding:14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;color:var(--text-dim);font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
+      <button onclick="pmLogout()" style="padding:14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;color:var(--text-dim);font-family:Roboto,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
         Выйти из аккаунта
       </button>
-      <button onclick="pmDeleteAccount()" style="padding:14px;background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.2);border-radius:12px;color:#ff6060;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
+      <button onclick="pmDeleteAccount()" style="padding:14px;background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.2);border-radius:12px;color:#ff6060;font-family:Roboto,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
         Удалить аккаунт
       </button>
     </div>
@@ -2261,38 +2290,57 @@ function filterPosts(tag, el){
   renderCommunity();
 }
 
+function openModal_post(){
+  document.getElementById('modal-post').classList.remove('hidden');
+}
+
+// Telegram group link for community threads
+// Each post links to your community group — replace with your actual group
+const TG_COMMUNITY_URL = 'https://t.me/babysnap_bot';
+
+function openPostThread(p){
+  // If post has a specific tg link, open it; otherwise open general community
+  const url = p.tgUrl || TG_COMMUNITY_URL;
+  if(window.Telegram && window.Telegram.WebApp){
+    window.Telegram.WebApp.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
 function renderCommunity(){
   const feed = document.getElementById('comm-feed');
   if(!feed) return;
-  const filtered = postFilter==='all' ? posts : posts.filter(p=>p.tag===postFilter);
+  const filtered = postFilter==='all' ? posts : posts.filter(function(p){ return p.tag===postFilter; });
   feed.innerHTML = '';
-  filtered.forEach((p,i)=>{
+  filtered.forEach(function(p, i){
     const meta = TAG_META[p.tag] || TAG_META.support;
     const card = document.createElement('div');
     card.className = 'post-card';
-    card.style.animationDelay = `${i*0.05}s`;
-    card.innerHTML = `
-      <div class="post-header">
-        <div class="post-avatar" style="background:${meta.bg}">${p.avatar||'👤'}</div>
-        <div class="post-meta">
-          <div class="post-author">${p.author} <span style="font-weight:600;color:var(--text-dim);font-size:12px">· ${p.city||''}</span></div>
-          <div class="post-info">малышу ${p.babyAge||'?'} · ${p.time||''}</div>
-        </div>
-        <div class="post-tag" style="background:${meta.bg};color:${meta.color}">${meta.label}</div>
-      </div>
-      <div class="post-body">${p.text}</div>
-      <div class="post-footer">
-        <button class="post-action" onclick="likePost(${p.id},this)">
-          <span>${p._liked?'❤️':'🤍'}</span> <span class="like-count">${p.likes}</span>
-        </button>
-        <button class="post-action">💬 Ответить</button>
-        <span class="post-time">${p.time||''}</span>
-      </div>
-    `;
+    card.style.animationDelay = (i*0.05) + 's';
+    card.innerHTML =
+      '<div class="post-header">' +
+        '<div class="post-avatar" style="background:' + meta.bg + '">' + (p.avatar||'👤') + '</div>' +
+        '<div class="post-meta">' +
+          '<div class="post-author">' + p.author + ' <span style="font-weight:400;color:var(--text-dim);font-size:11px">· ' + (p.city||'') + '</span></div>' +
+          '<div class="post-info">малышу ' + (p.babyAge||'?') + ' · ' + (p.time||'') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="post-tag-row"><span class="post-tag" style="background:' + meta.bg + ';color:' + meta.color + '">' + meta.label + '</span></div>' +
+      '<div class="post-body">' + p.text + '</div>' +
+      '<div class="post-footer">' +
+        '<button class="post-action" onclick="likePost(' + p.id + ',this);event.stopPropagation()">' +
+          '<span>' + (p._liked?'❤️':'🤍') + '</span> <span class="like-count">' + p.likes + '</span>' +
+        '</button>' +
+        '<button class="post-tg-link" onclick="openPostThread(posts.find(function(x){return x.id===' + p.id + '}));event.stopPropagation()">' +
+          '✈️ Открыть в Telegram' +
+        '</button>' +
+      '</div>';
+    card.onclick = function(){ openPostThread(p); };
     feed.appendChild(card);
   });
   if(filtered.length===0){
-    feed.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px 20px;font-size:14px">Пока нет постов в этой категории 💬<br><br>Будь первой!</div>';
+    feed.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px 20px;font-size:14px">Пока нет постов 💬<br><br><button onclick="openModal_post()" style="margin-top:12px;padding:12px 20px;background:linear-gradient(135deg,var(--purple),var(--purple-soft));border:none;border-radius:14px;color:#fff;font-family:Roboto,sans-serif;font-size:14px;font-weight:700;cursor:pointer">Написать пост ✏️</button></div>';
   }
 }
 
